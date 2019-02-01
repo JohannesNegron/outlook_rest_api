@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>SpRestLib API Demos</title>
+	<meta charset="utf-8">
+	<meta name="viewport"    content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="author"      content="https://github.com/gitbrent/">
+	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
+	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
+	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
+	<meta name="revised"     content="20181203">
+
+	<!-- HOWTO / FAQ / SETUP -->
+	<!--
+		SETUP:
+		1) Add this file to your SharePoint `SiteAssets` Library
+		2) Create a new Page named "sprestlib-demo.aspx"
+		3) Add a Content Editor Web Part to the page and set its source to "../SiteAssets/sprestlib-demo.html" (or wherever)
+		4) The "sprestlib-demo.aspx" page is ready to be used!
+		HELP:
+		*) Check the img folder for screencaps of the SharePoint setup!
+	-->
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.min.css">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+
+	<style>
+		.ms-webpartPage-root { border-spacing: 0px !important; /* FIX-O365 */ }
+
+		/* -- brentstrap.css ---------- */
+		.bde-arrow-cont {
+			cursor: pointer;
+			-webkit-user-select: none;
+		       -moz-user-select: none;
+		        -ms-user-select: none;
+		            user-select: none;
+		}
+		.bde-arrow-cont span.text-muted {
+			font-size: 50% !important;
+			color: #b9c9d9 !important;
+			text-transform: none !important;
+			margin-left: 4px;
+		}
+		.arrow {
+			display: inline-block;
+			height: 12px; width: 12px;
+			border-top: 3px solid #0085C3; border-right: 3px solid #0085C3;
+			margin-right: 10px;
+			cursor: pointer;
+			transition: all .25s ease;
+			transform: rotate(45deg);
+		}
+		.arrow.active {
+			transform: rotate(135deg);
+			margin-bottom: 3px;
+		}
+		.bde-callout-info {
+			padding: 1.1rem;
+			border: 1px solid #eee;
+			border-left-width: .25rem;
+			border-radius: .25rem;
+			border-left-color: #5bc0de;
+		}
+
+		.nowctr { white-space: nowrap !important; text-align: center !important; }
+		.text-nowrap { white-space: nowrap !important; }
+		.alert-highlight { background-color: #fffccc; }
+		/* -- brentstrap.css ---------- */
+		.text-muted { font-weight:normal; }
+		.code { white-space: pre !important; }
+		#sandboxCode:focus {
+			/* Chrome draws a super-annoying outline around *each line* in the <code> tag, so NOPE! */
+		    outline: none; /*-webkit-focus-ring-color auto 5px;*/
+		}
+		.itemBox {
+			display: inline-block;
+			background: #fafbfc; /* makes page scrolling too slow!: linear-gradient(#f2f9fc,#fdfeff); */
+			border: 1px #e7e7f7 solid;
+			color: #999;
+			margin: 0 6px 3px 0;
+			padding: 2px 6px;
+			border-radius: 3px;
+		}
+
+		/* ------------------------------------------------------------------------- */
+		.sprlib-spinner {
+			display: inline-block;
+			height: 32px;
+			text-align: center;
+			white-space: nowrap;
+		}
+		.sprlib-spinner > div {
+			display: inline-block;
+			width:32px; height:32px;
+			background-color: #40b0df;
+			border: 3px solid #f2f9fc;
+			border-radius: 100%;
+			animation: sprlib-sk-bouncedelay 1.4s infinite ease-in-out both;
+		}
+		.sprlib-spinner .sprlib-bounce1 { animation-delay: -0.32s; }
+		.sprlib-spinner .sprlib-bounce2 { animation-delay: -0.16s; }
+		@keyframes sprlib-sk-bouncedelay { 0%, 80%, 100% {  transform: scale(0); } 40% { transform: scale(1.0); } }
+
+		/* ------------------------------------------------------------------------- */
+		/* 2017-10 Brent SVG Images */
+		div.iconSvg {
+			display: inline-block;
+			background-size: contain;
+			max-width: 256px;
+			max-height: 256px;
+		}
+		div.iconSvg.size16 { width:16px; height:16px; }
+		div.iconSvg.size20 { width:20px; height:20px; }
+		div.iconSvg.size24 { width:24px; height:24px; }
+		div.iconSvg.size32 { width:32px; height:32px; }
+		div.iconSvg.size48 { width:48px; height:48px; }
+		div.iconSvg.circle.question, div.iconSvg.question {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUwIDUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MCA1MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxjaXJjbGUgc3R5bGU9ImZpbGw6IzQ4QTBEQzsiIGN4PSIyNSIgY3k9IjI1IiByPSIyNSIvPgo8bGluZSBzdHlsZT0iZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDoyO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwOyIgeDE9IjI1IiB5MT0iMzciIHgyPSIyNSIgeTI9IjM5Ii8+CjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNGRkZGRkY7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBkPSJNMTgsMTYgIGMwLTMuODk5LDMuMTg4LTcuMDU0LDcuMS02Ljk5OWMzLjcxNywwLjA1Miw2Ljg0OCwzLjE4Miw2LjksNi45YzAuMDM1LDIuNTExLTEuMjUyLDQuNzIzLTMuMjEsNS45ODYgIEMyNi4zNTUsMjMuNDU3LDI1LDI2LjI2MSwyNSwyOS4xNThWMzIiLz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==);
+		}
+		div.iconSvg.yes, div.iconSvg.check {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaWQ9IkxheWVyXzEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48c3R5bGUgdHlwZT0idGV4dC9jc3MiPi5zdDB7ZmlsbDojMkJCNjczO30uc3Qxe2ZpbGw6bm9uZTtzdHJva2U6I0ZGRkZGRjtzdHJva2Utd2lkdGg6MzA7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PHBhdGggY2xhc3M9InN0MCIgZD0iTTQ4OSwyNTUuOWMwLTAuMiwwLTAuNSwwLTAuN2MwLTEuNiwwLTMuMi0wLjEtNC43YzAtMC45LTAuMS0xLjgtMC4xLTIuOGMwLTAuOS0wLjEtMS44LTAuMS0yLjcgIGMtMC4xLTEuMS0wLjEtMi4yLTAuMi0zLjNjMC0wLjctMC4xLTEuNC0wLjEtMi4xYy0wLjEtMS4yLTAuMi0yLjQtMC4zLTMuNmMwLTAuNS0wLjEtMS4xLTAuMS0xLjZjLTAuMS0xLjMtMC4zLTIuNi0wLjQtNCAgYzAtMC4zLTAuMS0wLjctMC4xLTFDNDc0LjMsMTEzLjIsMzc1LjcsMjIuOSwyNTYsMjIuOVMzNy43LDExMy4yLDI0LjUsMjI5LjVjMCwwLjMtMC4xLDAuNy0wLjEsMWMtMC4xLDEuMy0wLjMsMi42LTAuNCw0ICBjLTAuMSwwLjUtMC4xLDEuMS0wLjEsMS42Yy0wLjEsMS4yLTAuMiwyLjQtMC4zLDMuNmMwLDAuNy0wLjEsMS40LTAuMSwyLjFjLTAuMSwxLjEtMC4xLDIuMi0wLjIsMy4zYzAsMC45LTAuMSwxLjgtMC4xLDIuNyAgYzAsMC45LTAuMSwxLjgtMC4xLDIuOGMwLDEuNi0wLjEsMy4yLTAuMSw0LjdjMCwwLjIsMCwwLjUsMCwwLjdjMCwwLDAsMCwwLDAuMXMwLDAsMCwwLjFjMCwwLjIsMCwwLjUsMCwwLjdjMCwxLjYsMCwzLjIsMC4xLDQuNyAgYzAsMC45LDAuMSwxLjgsMC4xLDIuOGMwLDAuOSwwLjEsMS44LDAuMSwyLjdjMC4xLDEuMSwwLjEsMi4yLDAuMiwzLjNjMCwwLjcsMC4xLDEuNCwwLjEsMi4xYzAuMSwxLjIsMC4yLDIuNCwwLjMsMy42ICBjMCwwLjUsMC4xLDEuMSwwLjEsMS42YzAuMSwxLjMsMC4zLDIuNiwwLjQsNGMwLDAuMywwLjEsMC43LDAuMSwxQzM3LjcsMzk4LjgsMTM2LjMsNDg5LjEsMjU2LDQ4OS4xczIxOC4zLTkwLjMsMjMxLjUtMjA2LjUgIGMwLTAuMywwLjEtMC43LDAuMS0xYzAuMS0xLjMsMC4zLTIuNiwwLjQtNGMwLjEtMC41LDAuMS0xLjEsMC4xLTEuNmMwLjEtMS4yLDAuMi0yLjQsMC4zLTMuNmMwLTAuNywwLjEtMS40LDAuMS0yLjEgIGMwLjEtMS4xLDAuMS0yLjIsMC4yLTMuM2MwLTAuOSwwLjEtMS44LDAuMS0yLjdjMC0wLjksMC4xLTEuOCwwLjEtMi44YzAtMS42LDAuMS0zLjIsMC4xLTQuN2MwLTAuMiwwLTAuNSwwLTAuNyAgQzQ4OSwyNTYsNDg5LDI1Niw0ODksMjU1LjlDNDg5LDI1Niw0ODksMjU2LDQ4OSwyNTUuOXoiIGlkPSJYTUxJRF8zXyIvPjxnIGlkPSJYTUxJRF8xXyI+PGxpbmUgY2xhc3M9InN0MSIgaWQ9IlhNTElEXzJfIiB4MT0iMjEzLjYiIHgyPSIzNjkuNyIgeTE9IjM0NC4yIiB5Mj0iMTg4LjIiLz48bGluZSBjbGFzcz0ic3QxIiBpZD0iWE1MSURfNF8iIHgxPSIyMzMuOCIgeDI9IjE1NC43IiB5MT0iMzQ1LjIiIHkyPSIyNjYuMSIvPjwvZz48L3N2Zz4=);
+		}
+		div.iconSvg.no,  div.iconSvg.fail {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUwIDUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1MCA1MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxjaXJjbGUgc3R5bGU9ImZpbGw6I0Q3NUE0QTsiIGN4PSIyNSIgY3k9IjI1IiByPSIyNSIvPgo8cG9seWxpbmUgc3R5bGU9ImZpbGw6bm9uZTtzdHJva2U6I0ZGRkZGRjtzdHJva2Utd2lkdGg6MjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoxMDsiIHBvaW50cz0iMTYsMzQgMjUsMjUgMzQsMTYgICAiLz4KPHBvbHlsaW5lIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNGRkZGRkY7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBwb2ludHM9IjE2LDE2IDI1LDI1IDM0LDM0ICAgIi8+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=);
+		}
+		div.iconSvg.xmark {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDQ0OS45OTggNDQ5Ljk5OCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDQ5Ljk5OCA0NDkuOTk4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4Ij48Zz48Zz48cG9seWdvbiBwb2ludHM9IjQ0OS45NzQsMzQuODU1IDQxNS4xOTEsMCAyMjUuMDA3LDE5MC4xODQgMzQuODM5LDAgMC4wMjQsMzQuODM5IDE5MC4xOTIsMjI0Ljk5OSAgICAgMC4wMjQsNDE1LjE1OSAzNC44MzksNDQ5Ljk5OCAyMjUuMDA3LDI1OS43OTcgNDE1LjE5MSw0NDkuOTk4IDQ0OS45NzQsNDE1LjE0MyAyNTkuODMsMjI0Ljk5OSAgICIgZmlsbD0iI0Q4MDAyNyIvPjwvZz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PGc+PC9nPjxnPjwvZz48Zz48L2c+PC9zdmc+);
+		}
+		div.iconSvg.circle.info {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4IiB2aWV3Qm94PSIwIDAgMzQ3LjYxMiAzNDcuNjEyIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAzNDcuNjEyIDM0Ny42MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIj48Zz48Zz48cGF0aCBmaWxsPSIjMDA4OENDIiBkPSJNMTczLjgwNywwQzc3Ljk3LDAsMCw3Ny45NywwLDE3My44MDZDMCwyNjkuNjQsNzcuOTcsMzQ3LjYxMiwxNzMuODA3LDM0Ny42MTJjOTUuODMzLDAsMTczLjgwNi03Ny45NzMsMTczLjgwNi0xNzMuODA3IEMzNDcuNjEyLDc3Ljk3LDI2OS42NCwwLDE3My44MDcsMHogTTE5Ni40ODksMjY5LjQ0N2MwLDkuOTMzLTguMDcsMTcuOTk3LTE3Ljk5LDE3Ljk5N2MtOS45MTQsMC0xNy45NjktOC4wNjQtMTcuOTY5LTE3Ljk5NyBWMTM3LjM0MmMwLTkuODk4LDguMDU2LTE3Ljk2NiwxNy45NjktMTcuOTY2YzkuOTIsMCwxNy45OSw4LjA2OCwxNy45OSwxNy45NjZWMjY5LjQ0N3ogTTE3OS4yMzQsMTAxLjE1NyBjLTExLjI5NCwwLTIwLjQ5NC05LjE5My0yMC40OTQtMjAuNDk1czkuMTkzLTIwLjQ5NSwyMC40OTQtMjAuNDk1YzExLjMwNSwwLDIwLjQ5OCw5LjE5MywyMC40OTgsMjAuNDk1IFMxOTAuNTM5LDEwMS4xNTcsMTc5LjIzNCwxMDEuMTU3eiIgLz48L2c+PC9nPjwvc3ZnPg==);
+		}
+		div.iconSvg.lock {
+			background-image:
+				url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU4IDU4IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1OCA1ODsiIHhtbDpzcGFjZT0icHJlc2VydmUiIHdpZHRoPSI1MTJweCIgaGVpZ2h0PSI1MTJweCI+CjxwYXRoIHN0eWxlPSJmaWxsOiNDN0NBQzc7c3Ryb2tlOiNDN0NBQzc7c3Ryb2tlLXdpZHRoOjI7c3Ryb2tlLW1pdGVybGltaXQ6MTA7IiBkPSJNNDIsMzJIMTVWMTMuNjAxQzE1LDYuNjUyLDIxLjA1NiwxLDI4LjUsMSAgUzQyLDYuNjUyLDQyLDEzLjYwMVYzMnogTTE5LDI4aDE5VjEzLjYwMUMzOCw4Ljg1OCwzMy43MzgsNSwyOC41LDVTMTksOC44NTgsMTksMTMuNjAxVjI4eiIvPgo8cmVjdCB4PSI4IiB5PSIyNiIgc3R5bGU9ImZpbGw6IzczODNCRjsiIHdpZHRoPSI0MiIgaGVpZ2h0PSIzMiIvPgo8cmVjdCB4PSIyOSIgeT0iMjYiIHN0eWxlPSJmaWxsOiM2ODc5QUY7IiB3aWR0aD0iMjEiIGhlaWdodD0iMzIiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6I0VCQkExNjsiIHBvaW50cz0iNDIuNTg2LDU3IDQ5LDUwLjU4NiA0OSw0NyA0My40MTQsNDcgMzMuNDE0LDU3ICIvPgo8cG9seWdvbiBzdHlsZT0iZmlsbDojNEY1OTcwOyIgcG9pbnRzPSI5LDQ3IDksNTQuNTg2IDE2LjU4Niw0NyAiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzQyNEE2MDsiIHBvaW50cz0iMzAuNTg2LDU3IDQwLjU4Niw0NyAzMS40MTQsNDcgMjEuNDE0LDU3ICIvPgo8cGF0aCBzdHlsZT0iZmlsbDojRUFDQzE4OyIgZD0iTTI4LjU4Niw0N2gtOS4xNzJsLTkuNzA3LDkuNzA3QzkuNTEyLDU2LjkwMiw5LjI1Niw1Nyw5LDU3aDkuNTg2TDI4LjU4Niw0N3oiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzQyNEE2MDsiIHBvaW50cz0iNDksNTcgNDksNTMuNDE0IDQ1LjQxNCw1NyAiLz4KPHBvbHlnb24gc3R5bGU9ImZpbGw6IzRGNTk3MDsiIHBvaW50cz0iMjksNDkuNDE0IDIxLjQxNCw1NyAyOSw1NyAiLz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==);
+		}
+		div.iconSvg.reload, div.iconSvg.refresh {
+			background-image:
+				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/PjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA1MTIuMDAyIDUxMi4wMDIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMi4wMDIgNTEyLjAwMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxwYXRoIHN0eWxlPSJmaWxsOiMwMDg4Y2M7IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCAyNTYgMjU2KSIgZD0iTTQzNi44NjYsNDM2Ljg3MWM0OC4zMTItNDguMzExLDc0LjkyMS0xMTIuNTQ2LDc0LjkyMS0xODAuODcxIGMwLTE0MS4wMzktMTE0Ljc0NC0yNTUuNzg1LTI1NS43ODMtMjU1Ljc4NnY0OS41MDdjMTEzLjc0MSwwLjAwMiwyMDYuMjc2LDkyLjUzOSwyMDYuMjc2LDIwNi4yNzljMCw1NS4xMDEtMjEuNDU4LDEwNi45MDItNjAuNDIsMTQ1Ljg2NGwtNy41NzEsNy41NzFsLTY3LjU1Mi02Ny41NTJsMC4wMjEsMTcwLjA3NmwxNzAuMDk2LDAuMDQxbC02Ny41NTktNjcuNTU5TDQzNi44NjYsNDM2Ljg3MXoiLz48cGF0aCBzdHlsZT0iZmlsbDojMDA4OGNjOyIgdHJhbnNmb3JtPSJyb3RhdGUoOTAgMjU2IDI1NikiIGQ9Ik00OS43MjQsMjU2LjAwMWMwLTU1LjEwMSwyMS40NTgtMTA2LjkwMiw2MC40Mi0xNDUuODY0bDcuNTcxLTcuNTcxbDY3LjU1Miw2Ny41NTJMMTg1LjI0NSwwLjA0MUwxNS4xNDgsMGw2Ny41NTksNjcuNTU5bC03LjU3MSw3LjU3QzI2LjgyNCwxMjMuNDM5LDAuMjE1LDE4Ny42NzUsMC4yMTUsMjU1Ljk5OWMwLDE0MS4wMzksMTE0Ljc0NCwyNTUuNzg1LDI1NS43ODMsMjU1Ljc4NnYtNDkuNTA3QzE0Mi4yNTgsNDYyLjI3OCw0OS43MjQsMzY5Ljc0Miw0OS43MjQsMjU2LjAwMXoiLz48L3N2Zz4=);
+		}
+
+		/* Flex modernTabs (Fall-2017) */
+		.flexTabs {
+			width: 100%;
+			margin: 20px 0 10px 0;
+			border: 1px solid #d5d5d5;
+			box-shadow: 0px 4px 10px -5px rgba(0,0,0,0.5);
+			border-radius: 5px;
+		}
+		.flexTabs > ul {
+			display: flex;
+			background: #F6F6F6;
+		    list-style-type: none;
+		    margin: 0 !important; -webkit-margin-before: 0;  -moz-margin-before: 0;  -ms-margin-before: 0;
+		    padding: 0 !important;
+		    border-bottom: 1px solid #d5d5d5;
+		    border-radius: 5px 5px 0 0;
+		}
+		.flexTabs > ul > li {
+			flex: 1 0 auto;
+			box-sizing: border-box;
+		    cursor: pointer;
+		    text-shadow: 2px 2px #efefef;
+		    text-align: center;
+		    display: inline-block;
+			list-style-type: none;
+		    padding: 15px;
+		    font-size: 14px;
+		    color: #a7a7a7;
+		    text-transform: uppercase;
+		    border-bottom: 3px solid #F6F6F6;
+		    -webkit-user-select: none;
+		       -moz-user-select: none;
+		        -ms-user-select: none;
+		            user-select: none;
+		}
+		.flexTabs > ul > li.active {
+		    font-weight: bold;
+		    text-shadow: none;
+		    color: #0088CC;
+		    border-bottom: 3px solid #0088cc;
+		}
+		.flexTabs > div {
+		    display: none;
+		    margin: 0;
+		    padding: 1.5rem 2rem;
+		    background: white;
+		    border-radius: 0 0 5px 5px;
+		}
+		.flexTabs > div.active { display: block; }
+		.flexTabs > div > .toolBar { width: 100%; min-height: 44px; display: table; margin-top: -20px; }
+		.flexTabs > div > .toolBar > div:first-child { display:table-cell; width:75%; text-align: left; padding:10px 0; vertical-align:middle; color:#bcd; }
+		.flexTabs > div > .toolBar > div:last-child  { display:table-cell; width:25%; text-align:right; padding:10px 0; vertical-align:middle; white-space:nowrap; }
+		.flexTabs > div > .toolBar button { border-radius: 2px; text-transform: none; }
+		.flexTabs > div > .toolBar img { vertical-align:middle; margin:-3px 3px 0 0; }
+
+		/* ------------------------------------------------------------------------- */
+		.tabModern {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 0px;
+		}
+		.tabModern > tbody > tr > th, .tabModern > tbody > tr > td { border: 1px #f1f1f1 solid; }
+		.tabModern th.icon {
+			width: 1%;
+			padding: 0 4px;
+		}
+		.tabModern td.icon {
+			width: 1%;
+			padding: 0 4px 0 0;
+			background: #f8fbff;
+		}
+		.tabModern > thead > tr > th {
+			background: #E5F2FA;
+			border-left: 1px white solid;
+			border-bottom: 1px white solid;
+			border-top: 1px #e7e7f3 solid;
+			text-align: left;
+			padding: 8px;
+			font-size: 11px;
+			font-weight: normal;
+			color: #0090C0;
+			text-transform: uppercase;
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+		.tabModern > thead > tr > th.title {
+		    background: #0088cc;
+		    text-align: center;
+		    padding: 10px;
+		    color: white;
+		    font-size: 14px;
+		    font-weight: bold;
+		}
+		.tabModern > thead > tr > th:first-child {
+			border-left: 1px #e7e7f3 solid;
+		}
+		.tabModern > thead > tr > th:last-child {
+			border-right: 1px #e7e7f3 solid;
+		}
+		.tabModern > tbody > tr > th {
+			text-align: left;
+			font-weight: normal;
+			padding: 6px 10px;
+			background: #f2f9fc;
+			color: #0088cc;
+			box-sizing: border-box;
+			border-bottom: 1px solid white !important;
+		}
+		.tabModern > tbody > tr > td {
+			text-align: left;
+			padding: 6px 10px;
+			background: white;
+			box-sizing: border-box;
+		}
+		.tabModern > tbody > tr > td > a:link {
+			text-decoration: underline;
+		}
+		.tabModern > tfoot > tr > td { padding: 15px; text-align: center; }
+		.tabModern td.gray { background: #f7f7f7; }
+		.tabModern td.blue { background: #E5F2FA; }
+		.tabModern th.tabModernSection, .tabModern td.tabModernSection {
+			background: #E5F2FA !important;
+			text-align: center !important;
+			padding: 8px !important;
+			color: #0F5199;
+		}
+		.tabModern.shadow { box-shadow:2px 2px 6px 2px #aaa; }
+
+		/* tablesorter.css */
+		.tablesorter thead th {
+			border-left: 1px white solid !important;
+			border-right: 1px white solid !important;
+			border-top: 1px #e7e7f3 solid !important;
+			border-bottom: 1px #e7e7f3 solid !important;
+		}
+		.tablesorter thead th:first-child { border-left:  1px #e7e7f3 solid !important; }
+		.tablesorter thead th:last-child  { border-right: 1px #e7e7f3 solid !important; }
+		.tablesorter thead .tablesorter-header {
+			background-repeat: no-repeat;
+			background-position: right 8px center;
+			cursor: pointer;
+		}
+		.tablesorter thead .tablesorter-headerAsc      { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIHjGEJq8sOCwA7') !important; }
+		.tablesorter thead .tablesorter-headerDesc     { background-color:#a9d4ef !important; color:#ffffff !important; background-image:url('data:image/gif;base64,R0lGODlhBwAEAIAAAP///////yH5BAEAAAEALAAAAAAHAAQAAAIIhA+BGWoNWSgAOw') !important; }
+		.tablesorter thead .tablesorter-headerUnSorted { background-color:#E5F2FA !important; color:#0090C0 !important; background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAJCAYAAAD+WDajAAAAKElEQVR42mNgQAYTDvxnwApAEjCMUwJFATYJrCbgtYtoo4lzLQ5/AgB5EEnhsdUsjwAAAABJRU5ErkJggg==') !important; }
+		.tablesorter > tbody > tr > td { border: 1px #F1F1F1 solid !important; color:#696969 !important; }
+		/* tablesorter - Make room for sort icons */
+		.tablesorter > thead > tr > th { padding: 6px 20px 6px 8px !important; }
+		.tablesorter > thead > tr > th.sorter-false { padding: 6px 8px !important; cursor: default; }
+		.tabModern > thead > tr > th.sorter-false { background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') !important; }
+		/* icon.checkbox cells in tbody */
+		.tablesorter > tbody > tr > td.icon {
+			width: 1%;
+			background: #f8fbff;
+			text-align: center;
+			white-space: nowrap;
+			border-top:1px solid #fff !important;
+			border-bottom:1px solid #fff !important;
+			padding: 0 4px;
+			vertical-align: middle;
+		}
+		.tablesorter > tbody > tr > td.icon:last-child { border-bottom: 1px solid #F1F1F1; }
+	</style>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.9.0/dist/sprestlib.bundle.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/sorensen/ascii-table@0.0.9/ascii-table.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.29.0/js/jquery.tablesorter.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
+
+	<script>
+		var APP_BLD = 20181203;
+		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+		var LAYOUTS_URL = ( typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.layoutsUrl ? _spPageContextInfo.layoutsUrl : '_layouts/15' );
+
+		// ==================================================================================================================
+
+		function getAsciiTableStr(arrayResults) {
+			var arrColHeadings = [];
+
+			Object.keys(arrayResults[0]).forEach(function(key,idx){
+				if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+				else arrColHeadings.push(key);
+			});
+
+			var table = new AsciiTable().setHeading( arrColHeadings );
+
+			arrayResults.forEach(function(obj,idx){
+				var vals = [];
+				$.each(obj, function(key,val){
+					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__deferred") > 0 ) val = "[[__deferred]]";
+					if ( typeof val === 'object' && JSON.stringify(val).indexOf("__metadata") > 0 ) val = "[[__metadata]]";
+					vals.push( ( typeof val === 'object' ? JSON.stringify(val) : val ) );
+				});
+				table.addRow(vals);
+			});
+
+			return table.toString();
+		}
+
+		// ==================================================================================================================
+
+		function handleListChange() {
+			// A: Clear results
+			$('#tab1-ListInfo table').remove();
+			$('#tab1-ListCols table').remove();
+			$('#tabListPerms').trigger("destroy");
+			$('#tabListPerms tbody').empty();
+			// B: Return if nothing selected
+			if ( !$('#selSiteLists').val() ) return;
+
+			// LIST INFO:
+			$('#tab1-ListInfo pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').info()' );
+			sprLib.list($('#selSiteLists').val()).info()
+			.then(function(objInfo){
+				var $table = $('<table class="tabModern"><tbody></tbody></table>');
+				$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+				Object.keys(objInfo).sort().forEach(function(key,idx){
+					$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code text-monospace">'+ objInfo[key] +'</td></tr>');
+				});
+				$('#tab1-ListInfo').append( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListInfo .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+
+			// LIST COLS:
+			$('#tab1-ListCols pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').cols()' );
+			sprLib.list($('#selSiteLists').val()).cols()
+			.then(function(arrColObjs){
+				var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+
+				if ( arrColObjs.length ) $.each(arrColObjs[0],function(key,val){ $table.find('thead tr').append('<th>'+key+'</th>') });
+
+				arrColObjs.forEach(function(obj,idx){
+					var $row = $('<tr/>');
+					$.each(obj,function(key,val){ $row.append('<td>'+val+'</td>') });
+					$table.find('tbody').append( $row );
+				});
+
+				$('#tab1-ListCols').append( $table );
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListCols .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+
+			// LIST PERMS:
+			$('#tab1-ListPerms pre code').text( 'sprLib.list(\''+ $('#selSiteLists').val() +'\').perms()' );
+			sprLib.list($('#selSiteLists').val()).perms()
+			.then(function(arrPerms){
+				arrPerms.forEach(function(perm){
+					// A-1: Create row
+					var $row = $('<tr/>');
+					$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+					$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+					$row.append('<td/>');
+					perm.Roles.forEach(function(role){
+						if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+					});
+					$('#tabListPerms tbody').append( $row );
+				});
+				if ( $.tablesorter ) $('#tabListPerms').tablesorter({ sortList:[[0,0]] });
+			})
+			.catch(function(errMsg){
+				$('$tab1-ListPerms .tableRows').after( '<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>' );
+			});
+
+			// LAST: Re-highlight code
+			$('#tabList code').each(function(idx,ele){
+				Prism.highlightElement( $(ele)[0] );
+			});
+		}
+
+		// FILES:
+
+		function handleFileLibChange() {
+			// A: Empty select
+			$('#selFileFiles').empty();
+			$('#selFileFiles').append('<option value="">Select...</option>');
+			$('#selFileFiles').prop('disabled',false);
+			$('#tabFile .alert.alert-success').remove();
+
+			// B: Return if nothing selected
+			if ( !$('#selFileLibs').val() ) { $('#selFileFiles').prop('disabled',true); return; }
+
+			// C: Show busy
+			$('#contFileFileSelect .sprlib-spinner').show();
+			$('#contFileFileSelect select').hide();
+
+			// D: Populate <select> with file names
+			sprLib.folder($('#selFileLibs').val()).files()
+			.then(function(arrResults){
+				arrResults
+				.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+				.forEach(function(obj,idx){
+					// NOTE: `/Forms` folder is special that `ListItemAllFields` will fail on!
+					if ( !obj.Hidden ) $('#selFileFiles').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
+				});
+				$('#contFileFileSelect .sprlib-spinner').hide();
+				$('#contFileFileSelect select').show();
+			});
+		}
+
+		function handleFileFileChange() {
+			// A: Clear results
+			$('#contFileInfo table, #contFileVer table').remove();
+			$('#tabFilePerms tbody').empty();
+			$('#tabFile .alert.alert-danger').remove();
+			$('#tabFile .alert.alert-success').remove();
+
+			// B: Return if nothing selected
+			if ( !$('#selFileFiles').val() ) return;
+
+			// FILE Props
+			{
+				// INFO:
+				$('#contFileInfo pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').info()' );
+				sprLib.file($('#selFileFiles').val()).info()
+				.then(function(objInfo){
+					var $table = $('<table class="tabModern"><tbody></tbody></table>');
+					$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+					Object.keys(objInfo).sort().forEach(function(key,idx){
+						$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code text-monospace">'+ ( typeof objInfo[key] === 'object' ? JSON.stringify(objInfo[key],null,3) : objInfo[key]) +'</td></tr>');
+					});
+					$('#contFileInfo').append( $table );
+				});
+
+				// INFO: (using `version`)
+				$('#contFileVer pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').info({ version:1.0 })' );
+				sprLib.file($('#selFileFiles').val()).info({ version:1 })
+				.then(function(objInfo){
+					var $table = $('<table class="tabModern"><tbody></tbody></table>');
+					$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+					Object.keys(objInfo).sort().forEach(function(key,idx){
+						$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code text-monospace">'+ ( typeof objInfo[key] === 'object' ? JSON.stringify(objInfo[key],null,3) : objInfo[key]) +'</td></tr>');
+					});
+					$('#contFileVer').append( $table );
+				})
+				.catch(function(errMsg){
+					$('#contFileVer').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+					console.error(errMsg);
+				});
+
+				// PERMS:
+				$('#contFilePerms pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').perms()' );
+				sprLib.file($('#selFileFiles').val()).perms()
+				.then(function(arrPerms){
+					arrPerms.forEach(function(perm){
+						// A-1: Create row
+						var $row = $('<tr/>');
+						$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+						$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+						$row.append('<td/>');
+						perm.Roles.forEach(function(role){
+							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						});
+						$('#tabFilePerms tbody').append( $row );
+					});
+					if ( $.tablesorter ) $('#contFilePerms table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFilePerms').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+					console.error(errMsg);
+				});
+			}
+
+			// FILE Manip
+			{
+				// GET/DOWNLOAD:
+				$('#contFileGet pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').get()' );
+				$('#codeGetFile').text(
+					"sprLib.file('"+ $('#selFileFiles').val() +"').get()\n"+
+					'.then(function(blob){\n'+
+					'    var url = (window.URL || window.webkitURL).createObjectURL(blob);\n'+
+					'    var link = document.createElement("a");\n'+
+					'    link.setAttribute("href", url);\n'+
+					'    link.setAttribute("download", _fileName);\n'+
+					'    link.style = "visibility:hidden";\n'+
+					'    document.body.appendChild(link);\n'+
+					'    link.click();\n'+
+					'    setTimeout(function(){ document.body.removeChild(link); }, 500);\n'+
+					'});'
+				);
+
+				// DELETE:
+				$('#contFileDel pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').delete()' );
+
+				// RECYCLE:
+				$('#contFileRec pre code').text( 'sprLib.file(\''+ $('#selFileFiles').val() +'\').recycle()' );
+			}
+
+			// LAST: Re-highlight code
+			$('#tabFile code').each(function(idx,ele){
+				Prism.highlightElement( $(ele)[0] );
+			});
+		}
+
+		function doFileDelete() {
+			$('#tabFile .alert.alert-success').remove();
+
+			sprLib.file($('#selFileFiles').val()).delete()
+			.then(function(){
+				$('#contFileDel').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>File deleted!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFileDel').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
+			});
+		}
+
+		function doFileRecycle() {
+			$('#tabFile .alert.alert-success').remove();
+
+			sprLib.file($('#selFileFiles').val()).recycle()
+			.then(function(){
+				$('#contFileRec').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>File recycled!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFileRec').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
+			});
+		}
+
+		// FOLDERS:
+
+		function handleFoldLibChange() {
+			// A: Empty select
+			$('#selFoldFlds').empty();
+			$('#selFoldFlds').append('<option value="">Select...</option>');
+			$('#selFoldFlds').prop('disabled',false);
+			$('#tabFold .alert.alert-success').remove();
+
+			// B: Return if nothing selected
+			if ( !$('#selFoldLibs').val() ) { $('#selFoldFlds').prop('disabled',true); return; }
+
+			// C: Show busy
+			$('#contFoldFldSelect .sprlib-spinner').show();
+			$('#contFoldFldSelect select').hide();
+
+			// D: Populate <select> with List names
+			sprLib.folder($('#selFoldLibs').val()).folders()
+			.then(function(arrResults){
+				arrResults
+				.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+				.forEach(function(obj,idx){
+					// NOTE: `/Forms` folder is special that `ListItemAllFields` will fail on!
+					if ( !obj.Hidden && obj.Name != 'Forms' ) $('#selFoldFlds').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Name +'</option>');
+				});
+				$('#contFoldFldSelect .sprlib-spinner').hide();
+				$('#contFoldFldSelect select').show();
+			});
+		}
+
+		function handleFoldFldChange() {
+			// A: Clear results
+			$('#tabFold .error').remove();
+			$('#contFoldInfo table').remove();
+			$('#contFoldFiles table, #contFoldFolds table').remove();
+			$('#tabFoldPerms tbody').empty();
+			$('#tabFold .alert.alert-success').remove();
+
+			// B: Return if nothing selected
+			if ( !$('#selFoldFlds').val() ) return;
+
+			// FOLDER INFO
+			{
+				// INFO:
+				$('#contFoldInfo pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').info()' );
+				sprLib.folder($('#selFoldFlds').val()).info()
+				.then(function(objInfo){
+					var $table = $('<table class="tabModern"><tbody></tbody></table>');
+					$table.append('<thead><tr><th>Prop Name</th><th>Prop Value</th></tr></thead>');
+					Object.keys(objInfo).sort().forEach(function(key,idx){
+						$table.find('tbody').append('<tr><th>'+ key +'</th>'+'<td class="code text-monospace">'+ objInfo[key] +'</td></tr>');
+					});
+					$('#contFoldInfo').append( $table );
+				})
+
+				// PERMS:
+				$('#contFoldPerms pre code').text( 'sprLib.file(\''+ $('#selFoldFlds').val() +'\').perms()' );
+				sprLib.folder($('#selFoldFlds').val()).perms()
+				.then(function(arrPerms){
+					arrPerms.forEach(function(perm){
+						// A-1: Create row
+						var $row = $('<tr/>');
+						$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+						$row.append('<td>'+ perm.Member.PrincipalType +'</td>');
+						$row.append('<td/>');
+						perm.Roles.forEach(function(role){
+							if ( !role.Hidden && role.Name ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						});
+						$('#tabFoldPerms tbody').append( $row );
+					});
+					if ( $.tablesorter ) $('#contFoldPerms table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFoldPerms table').after('<h6 class="error text-danger">'+errMsg+'</h6>');
+					console.error(errMsg);
+				});
+			}
+
+			// FOLDER CONTENTS
+			{
+				// FILES:
+				$('#contFoldFiles pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').files()' );
+				sprLib.folder($('#selFoldFlds').val()).files()
+				.then(function(arrObjs){
+					var arrShowCols = ['Name', 'Created', 'Modified', 'ModifiedBy', 'Length', 'MajorVersion'];
+					var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+					// thead
+					arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
+					// tbody
+					arrObjs.forEach(function(obj){
+						var $row = $('<tr/>');
+						arrShowCols.forEach(function(col){
+							var strCell = obj[col];
+
+							if ( col == "ModifiedBy" ) strCell = obj.ModifiedBy.Title;
+							else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
+							else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
+
+							$row.append('<td>'+ strCell +'</td>');
+						});
+						$table.find('tbody').append( $row );
+					});
+
+					$('#contFoldFiles').append( $table );
+					if ( $.tablesorter ) $('#contFoldFiles table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFoldFiles').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+					console.error(errMsg);
+				});
+
+				// FOLDERS:
+				$('#contFoldFolds pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').folders()' );
+				sprLib.folder($('#selFoldFlds').val()).folders()
+				.then(function(arrObjs){
+					var arrShowCols = ['Name', 'Created', 'Modified', 'FolderCount', 'ItemCount'];
+					var $table = $('<table class="tabModern"><thead><tr></tr></thead><tbody></tbody></table>');
+					// thead
+					arrShowCols.forEach(function(col){ $table.find('thead tr').append('<th>'+col+'</th>'); });
+					// tbody
+					arrObjs.forEach(function(obj){
+						var $row = $('<tr/>');
+						arrShowCols.forEach(function(col){
+							var strCell = obj[col];
+
+							if ( col == "ModifiedBy" && obj.ModifiedBy ) strCell = obj.ModifiedBy.Title;
+							else if ( col == "Created" ) strCell = new Date(obj.Created).toLocaleString();
+							else if ( col == "Modified" ) strCell = new Date(obj.Modified).toLocaleString();
+
+							$row.append('<td>'+ strCell +'</td>');
+						});
+						$table.find('tbody').append( $row );
+					});
+
+					$('#contFoldFolds').append( $table );
+					if ( $.tablesorter ) $('#contFoldFolds table').tablesorter({ sortList:[[0,0]] });
+				})
+				.catch(function(errMsg){
+					$('#contFoldFolds').append('<table><tbody><tr><td>'+errMsg+'</td></tr></tbody></table>');
+					console.error(errMsg);
+				});
+			}
+
+			// FOLDER MANIP
+			{
+				// ADD:
+				$('#codeAddFold pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').add()' );
+
+				// DELETE:
+				$('#contFoldDel pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').delete()' );
+
+				// RECYCLE:
+				$('#contFoldRec pre code').text( 'sprLib.folder(\''+ $('#selFoldFlds').val() +'\').recycle()' );
+			}
+
+			// LAST: Re-highlight code
+			$('#tabFold code').each(function(idx,ele){
+				Prism.highlightElement( $(ele)[0] );
+			});
+		}
+
+		function doAddFolder() {
+			$('#tabFold .alert.alert-success').remove();
+			$('#tabFold .alert.alert-warning').remove();
+			$('#tabFold .alert.alert-danger').remove();
+
+			// A:
+			$('#addFolderName').removeClass('is-invalid');
+
+			// B:
+			if ( !$('#addFolderName').val().trim() ) {
+				$('#addFolderName').addClass('is-invalid');
+				return;
+			}
+			else if ( !$('#selFoldFlds').val() ) {
+				$('#contFoldAdd').append('<div class="alert alert-warning mt-3"><h3 class="m-0">Select a Library/Folder above!</h3></div>');
+				return;
+			}
+
+			// C:
+			sprLib.folder($('#selFoldFlds').val()).add($('#addFolderName').val())
+			.then(function(){
+				// A: Refresh tab
+				handleFoldFldChange();
+				// B: Show success msg
+				$('#contFoldAdd').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>Folder created!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFoldAdd').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
+			});
+		}
+
+		function doFoldDelete() {
+			$('#tabFold .alert.alert-success').remove();
+
+			sprLib.folder($('#selFoldFlds').val()).delete()
+			.then(function(){
+				$('#contFoldDel').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>Folder deleted!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFoldDel').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
+			});
+		}
+
+		function doFoldRecycle() {
+			$('#tabFold .alert.alert-success').remove();
+
+			sprLib.folder($('#selFoldFlds').val()).recycle()
+			.then(function(){
+				$('#contFoldRec').append(
+					'<div class="alert alert-success mt-2" style="font-size:2rem"><i class="fas fa-check-circle text-white mr-3"></i>Folder recycled!</div>'
+				);
+			})
+			.catch(function(errMsg){
+				$('#contFoldRec').append('<div class="alert alert-danger mt-3"><h3>ERROR</h3>'+errMsg+'</div>');
+				console.error(errMsg);
+			});
+		}
+
+		// ==================================================================================================================
+
+		function execCodeAndShowResults(eleCode, eleData) {
+			var SKIP_META = true;
+			var arrResults = [];
+			var table = "";
+
+			// A:
+			$('#'+eleData).html( HTML_SPINNER );
+			// TODO: use addClass('spinner') instead!
+
+			// B:
+			Promise.resolve()
+			.then(function(){
+				return eval( $('#'+eleCode).text() )
+			})
+			.then(function(arrItems){
+				if ( !arrItems || arrItems.length == 0 ) {
+					$('#'+eleData).html( '(No results returned)' );
+					return;
+				}
+
+				if ( arrItems && !Array.isArray(arrItems) && typeof arrItems === 'object' ) {
+					Object.keys(arrItems).forEach(key => {
+						var propVal = arrItems[key];
+						if ( typeof propVal === 'object' ) propVal = JSON.stringify(propVal); // works for actual objects and `null`
+						else if ( typeof propVal === 'number' || typeof propVal === 'boolean' ) propVal = propVal.toString(); // so AsciiTable will left-align
+						else if ( typeof propVal === 'string' && propVal.indexOf('"') == -1 ) propVal = '"'+propVal+'"';
+						//
+						arrResults.push({ 'name':key,'value':propVal });
+					});
+					table = new AsciiTable().setHeading( ['Prop Name','Prop Value'] );
+				}
+				else if ( Array.isArray(arrItems) && arrItems.length > 0 ) {
+					arrResults = arrItems;
+					var arrColHeadings = [];
+					Object.keys(arrItems[0]).forEach(function(key,idx){
+						if ( SKIP_META && key == '__metadata' ) return;
+						if ( typeof key === 'object' ) Object.keys(key).forEach(function(key,idx){ arrColHeadings.push(key) });
+						else arrColHeadings.push(key);
+					});
+
+					table = new AsciiTable().setHeading( arrColHeadings );
+				}
+
+				arrResults.forEach(function(obj,idx){
+					var vals = [];
+					$.each(obj, function(key,val){
+						if ( SKIP_META && key == '__metadata' ) return;
+						vals.push( ( typeof val === 'object' && key != '__metadata' ? JSON.stringify(val) : val ) );
+					});
+					table.addRow(vals);
+				});
+
+				// Show
+				$('#'+eleData).html( table.toString() );
+			})
+			.catch(function(strErr){
+				$('#'+eleData).html( '<h2 style="color:red">ERROR</h2>'+strErr );
+			});
+		}
+
+		function doPageLoad() {
+			// STEP 1: HTML Setup
+			document.title = "SpRestLib - JavaScript Library for SharePoint Web Services";
+
+			// TAB: Setup
+			{
+				// JS: jQuery
+				if ( typeof jQuery !== 'undefined' ) {
+					$('#libChkJquery').parent().find('label').after('<div class="iconSvg check size20 float-right"></div>');
+					$('#libChkJquery').val( jQuery.fn.jquery );
+				}
+				else {
+					$('#libChkJquery').parent().find('label').after('<div class="iconSvg no size20 float-right"></div>');
+					$('#libChkJquery').val( '???' ).addClass('bg-danger text-white');
+				}
+
+				// JS: jQuery-tablesorter
+				if ( typeof $.tablesorter !== 'undefined' ) {
+					$('#libChkTsorter').parent().find('label').after('<div class="iconSvg check size20 float-right"></div>');
+					$('#libChkTsorter').val( $.tablesorter.version );
+				}
+				else {
+					$('#libChkTsorter').parent().find('label').after('<div class="iconSvg no size20 float-right"></div>');
+					$('#libChkTsorter').val( '???' ).addClass('bg-danger text-white');
+				}
+
+				// JS: SpRestLib
+				if ( typeof sprLib !== 'undefined' ) {
+					$('#libChkSprLib').parent().find('label').after('<div class="iconSvg check size20 float-right"></div>');
+					$('#libChkSprLib').val( sprLib.version );
+
+					// Make human readable when relative directory returned
+					try {
+						$('#spBaseUrl').val( (sprLib.baseUrl() == ".." ? _spPageContextInfo.siteAbsoluteUrl : sprLib.baseUrl()) );
+					}
+					catch(ex){
+						$('#spBaseUrl').addClass('bg-danger').after('<div class="alert alert-danger"><h3>ERROR</h3>'+ex+'</div>');
+					}
+				}
+				else {
+					$('#libChkSprLib').parent().find('label').after('<div class="iconSvg no size20 float-right"></div>');
+					$('#libChkSprLib').text( '???' ).addClass('bg-danger text-white');
+					$('#spBaseUrl').text( '(n/a)' ).addClass('bg-danger text-white');
+
+					// Halt execution
+					return;
+				}
+			}
+
+			// TAB: List
+			{
+				$('#contListSelect select').hide();
+				// Populate <select> with List names
+				sprLib.rest({ restUrl:'_api/web/lists/' })
+				.then(function(arrayListObjs){
+					arrayListObjs
+					.sort(function(a,b){return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0);} )
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden ) $('#selSiteLists').append('<option value="'+ obj.Title +'">'+ obj.Title +'</option>');
+					});
+					$('#contListSelect .sprlib-spinner').remove();
+					$('#contListSelect select').show();
+				})
+				.catch(function(strErr){
+					$('#contListSelect .sprlib-spinner').remove();
+					$('#contListSelect select').after('<span class="text-danger">'+strErr+'</span>');
+				});
+			}
+
+			// TAB: File
+			{
+				$('#contFileLibsSelect select, #contFileFileSelect select').hide();
+				sprLib.site().lists()
+				.then(function(arrResults){
+					arrResults
+					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFileLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
+					});
+					$('#contFileLibsSelect, #contFileFileSelect').find('.sprlib-spinner').hide();
+					$('#contFileLibsSelect, #contFileFileSelect').find('select').show();
+				})
+				.catch(function(strErr){
+					$('#contFileLibsSelect, #contFileFileSelect').find('.sprlib-spinner').hide();
+					$('#contFileLibsSelect, #contFileFileSelect').find('select').after('<span class="text-danger">'+strErr+'</span>');
+				});
+			}
+
+			// TAB: Folder
+			{
+				$('#contFoldLibSelect select, #contFoldFldSelect select').hide();
+				sprLib.site().lists()
+				.then(function(arrResults){
+					arrResults
+					.sort(function(a,b){ return (a.Title > b.Title) ? 1 : ((b.Title > a.Title) ? -1 : 0); })
+					.forEach(function(obj,idx){
+						if ( !obj.Hidden && obj.BaseType == "Library" ) $('#selFoldLibs').append('<option value="'+ obj.ServerRelativeUrl +'">'+ obj.Title +'</option>');
+					});
+					$('#contFoldLibSelect, #contFoldFldSelect').find('.sprlib-spinner').hide();
+					$('#contFoldLibSelect, #contFoldFldSelect').find('select').show();
+				})
+				.catch(function(strErr){
+					$('#contFoldLibSelect, #contFoldFldSelect').find('.sprlib-spinner').hide();
+					$('#contFoldLibSelect, #contFoldFldSelect').find('select').after('<span class="text-danger">'+strErr+'</span>');
+				});
+			}
+
+			// TAB: Site
+			{
+				// Clear UI
+				if ( $.tablesorter ) $('#tabSite .tablesorter').trigger("destroy");
+				$('#tabSite table tbody').empty();
+
+				// A: Site Info
+				sprLib.site().info()
+				.then(function(objSite){
+					Object.keys(objSite).forEach(function(key,idx){
+						$('#tabSiteInfo tbody').append(
+							'<tr><th>'+ key +'</th>'
+							+ '<td class="code text-monospace">'+ (typeof objSite[key] === 'object' ? JSON.stringify(objSite[key],null,4) : objSite[key]) +'</td>'
+							+ '</tr>'
+						);
+					});
+					if ( $.tablesorter ) $('#tabSiteInfo').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// B: Site Contents (Lists/Libraries)
+				sprLib.site().lists()
+				.then(function(arrLists){
+					arrLists.forEach(function(list,idx){
+						if ( !list.Hidden ) {
+							var $row = $('<tr/>');
+							$row.append('<th><img class="mr-2" src="'+ list.ImageUrl +'">'
+								+ '<a href="'+ list.ServerRelativeUrl +'" target="_blank">'+ list.Title +'</a>'
+								+ (list.Description ? '<div class="text-muted ml-4"><span style="display:none">: </span>'+ list.Description +'</div>' : '')
+								+ '</th>'
+							);
+							$row.append('<td>'+ list.BaseType +'</td>');
+							$row.append('<td class="text-right">'+ list.ItemCount +'</td>');
+							$('#tabSiteLists tbody').append( $row );
+						}
+					});
+					if ( $.tablesorter ) $('#tabSiteLists').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// C: Site Perms
+				sprLib.site().perms()
+				.then(function(arrPerms){
+					arrPerms.forEach(function(perm,idx){
+						// A-1: Create row
+						var $row = $('<tr/>');
+						$row.append('<th><a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ perm.Member.PrincipalId +'" target="_blank">'+ perm.Member.Title +'</a></th>');
+						$row.append('<td/>');
+						perm.Roles.forEach(function(role,idx){
+							if ( !role.Hidden ) $row.find('td:last-child').append('<div class="itemBox">'+ role.Name +'<span style="display:none">; </span></div>');
+						});
+						$('#tabSitePerms tbody').append( $row );
+					});
+					if ( $.tablesorter ) $('#tabSitePerms').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// D: Site Groups
+				sprLib.site().groups()
+				.then(function(arrGroups){
+					// B: Populate Groups
+					arrGroups.forEach(function(group,idx){
+						// Hide "System Account" Groups
+						// Ex: 'Title':"SharingLinks.44086f6e-e6e7-409f-9a2f-6ff12121bc85.OrganizationEdit.79c8003a-1234-4ca7-a942-172a81817a6a"
+						if ( group.OwnerTitle != 'System Account' ) {
+							// A-1: Create row
+							var $row = $('<tr/>');
+							$row.append('<th>'
+								+ '<img class="mr-2" src="/'+LAYOUTS_URL+'/images/ribbon_userprofile_16.png">'
+								+ '<a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+								+ '</th>');
+							$row.append('<td>'+ group.OwnerTitle +'</td>');
+							$row.append('<td id="groupCount'+ group.Id +'" class="nowctr"></td>');
+							$row.append('<td class="showGrpDesc">'+ group.Description +'</td>');
+							$row.append('<td id="groupUsers'+ group.Id +'" class="showGrpMemb"></td>');
+							$('#tabSiteGroups tbody').append( $row );
+
+							// A-2: Populate Group members
+							sprLib.rest({
+								url: '_api/web/SiteGroups('+ group.Id +')/Users',
+								queryCols: ['Id','Email','LoginName','PrincipalType','Title']
+							})
+							.then(function(arrUsers){
+								arrUsers.forEach(function(user,idx){ $('#groupUsers'+group.Id).append('<div class="itemBox">'+ user.Title +'<span style="display:none">; </span></div>') });
+								$('#groupCount'+group.Id).text( $('#groupUsers'+group.Id+' .itemBox').length );
+							})
+							.catch(function(strErr){ $('#groupUsers'+group.Id).text(strErr||'?') });
+						}
+					});
+					// FIXME: This will fire before all the AJAX above, then count sorting wont work, etc.
+					if ( $.tablesorter ) $('#tabSiteGroups').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// E: Site Roles
+				sprLib.site().roles()
+				.then(function(arrRoles){
+					arrRoles.forEach(function(role,idx){
+						// Filter: Hidden roles
+						if ( !role.Hidden ) {
+							var $row = $('<tr/>');
+							$row.append('<th><a href="../'+LAYOUTS_URL+'/EditRole.aspx?role='+ role.Name +'" target="_blank">'+ role.Name +'</a></th>');
+							$row.append('<td class="showGrpDesc">'+ role.Description +'</td>');
+							$('#tabSiteRoles tbody').append( $row );
+						}
+					});
+					if ( $.tablesorter ) $('#tabSiteRoles').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// F: Site Subsites
+				sprLib.site().subsites()
+				.then(function(arrSites){
+					arrSites.forEach(function(site,idx){
+						var $row = $('<tr/>');
+						$row.append('<th><a href="'+ site.UrlRel +'" target="_blank" title="Site GUID: '+ site.Id +'">'+ site.Name +'</a></th>');
+						$row.append('<td class="showGrpDesc">'+ site.Created +'</td>');
+						$row.append('<td class="showGrpDesc">'+ site.Modified +'</td>');
+						$row.append('<td>'+ site.UrlRel +'</td>');
+						$row.append('<td>'+ site.SiteLogoUrl +'</td>');
+						$('#tabSiteSubsites tbody').append( $row );
+					});
+					if ( $.tablesorter ) $('#tabSiteSubsites').tablesorter({ sortList:[[0,0]] });
+				});
+
+				// G: Site Users
+				sprLib.site().users()
+				.then(function(arrUsers){
+					// G-1: Populate Users
+					arrUsers.forEach(function(user,idx){
+						var $row = $('<tr/>');
+						$row.append('<td>'+ user.Title +'</td>');
+						$row.append('<td>'+ user.LoginName +'</td>');
+						$row.append('<td>'+ user.Email +'</td>');
+						$row.append('<td class="nowctr">'+ (user.IsSiteAdmin ? 'Yes' : 'No') +'</td>');
+						$row.append('<td class="nowctr">'+ user.Groups.length +'</td>');
+						$row.append('<td class="showUsersGrp"></td>');
+						user.Groups.forEach(function(group,idx){
+							$row.find('td:last-child').append(
+								'<div class="itemBox">'
+								+ '<a href="../'+LAYOUTS_URL+'/people.aspx?MembershipGroupId='+ group.Id +'" target="_blank">'+ group.Title +'</a>'
+								+ '</div>'
+							);
+						});
+						$('#tabSiteUsers tbody').append( $row );
+					});
+
+					// G-2: This will fire before all the AJAX above, then count sorting wont work, etc.
+					if ( $.tablesorter ) $('#tabSiteUsers').tablesorter({ sortList:[[0,0]] });
+				});
+			}
+
+			// TAB: User/Groups
+			{
+				var user1Code = "sprLib.user().info()\n"
+					+ ".then(function(objUser){\n"
+					+ "    Object.keys(objUser).forEach(function(key){\n"
+					+ "        var val = objUser[key];\n"
+					+ "        $('#user1Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
+					+ "    });\n"
+					+ "});";
+				$('#user1Code pre code').text( user1Code );
+				eval(user1Code);
+
+				var user2Code = "sprLib.user().groups()\n"
+					+ ".then(function(objUser){\n"
+					+ "    arrGroups.forEach(function(objGroup,idx){\n"
+					+ "        $('#user2Html table tbody').append('<tr><td>'+ objGroup.Id +'</td><td>'+ objGroup.Title +'</td></tr>');\n"
+					+ "    });\n"
+					+ '});';
+				$('#user2Code pre code').text( user2Code );
+				eval(user2Code);
+
+				var user3Code = "sprLib.user().profile(['PersonalSpace'])\n"
+					+ ".then(function(objUser){\n"
+					+ "    Object.keys(objUser).forEach(function(key){\n"
+					+ "        var val = objUser[key];\n"
+					+ "        $('#user3Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
+					+ "    });\n"
+					+ '});';
+				$('#user3Code pre code').text( user3Code );
+				eval(user3Code);
+
+				var user4Code = "sprLib.user().profile()\n"
+					+ ".then(function(objUser){\n"
+					+ "    Object.keys(objUser).forEach(function(key){\n"
+					+ "        var val = objUser[key];\n"
+					//+ "        if (typeof val !== 'object') $('#user4Html table tbody').append('<tr><th>'+ key +'</th><td>'+ val +'</td></tr>');\n"
+					+ "        $('#user4Html table tbody').append('<tr><th>'+ key +'</th><td class=\"code text-monospace\">'+ (typeof val === 'object' ? JSON.stringify(val,null,4) : val) +'</td></tr>');\n"
+					+ "    });\n"
+					+ "});";
+				$('#user4Code pre code').text( user4Code );
+				eval(user4Code);
+			}
+
+			// TAB: REST API
+			{
+				var rest1Code = "sprLib.rest({\n"
+				 	+ "    url: '_api/web/lists/',\n"
+					+ "    queryCols: ['BaseType', 'ItemCount', 'Title']\n"
+				 	+ "})\n"
+					+ ".then(function(arrayListObjs){\n"
+					+ "    $('#rest1Html').append( getAsciiTableStr(arrayListObjs) );\n"
+					+ "});";
+				$('#rest1Code pre code').text( rest1Code );
+				eval(rest1Code);
+			}
+
+			// TAB: Sandbox
+			{
+				$('#sandboxCode').text(
+					"sprLib.list('Site Assets')\n"
+					+ ".items({\n"
+					+ "    listCols: ['Id','FileLeafRef','Created','Modified']\n"
+					+ "})"
+				);
+			}
+
+			// LAST: Highlight all generated code
+			Prism.highlightAll();
+		}
+
+		// ==================================================================================================================
+		$(document).ready(function(){
+			// If you're me: Load newest/local copy for dev/test work :-)
+			if ( window.location.href.toLowerCase().indexOf('gitbrent') > -1 && window.location.href.toLowerCase().indexOf('debug') > -1 ) {
+				// Dynamically load library as SharePoint Online is *BAD* about caching
+				$.getScript("../SiteAssets/sprestlib/js/sprestlib.js", function(){
+					$('#libChkSprLib').val( sprLib.version ).addClass('bg-success text-white');
+					console.log('FYI: Local copy of `sprestlib.js` loaded successfully...');
+					console.log( sprLib.version );
+					doPageLoad();
+				});
+			}
+			else if ( typeof sprLib === 'undefined' ) {
+				alert("Oops!\n\n`sprLib` is undefined - maybe a bad link to the 'sprestlib.js' file or something...?\n");
+				return;
+			}
+			else {
+				doPageLoad();
+			}
+		});
+	</script>
+</head>
+<body>
+	<h2><a href="https://github.com/GitBrent/SpRestLib" target="_blank">SpRestLib API Demos</a></h2>
+	<h6>SharePoint REST JavaScript Library</h6>
+
+	<div id="navTabs" class="flexTabs">
+		<ul>
+			<li class="active" onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSetup').addClass('active');">Setup</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabList').addClass('active');">List/Library</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFile').addClass('active');">File</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabFold').addClass('active');">Folder</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSite').addClass('active');">Site</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabUser').addClass('active');">User</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabRest').addClass('active');">REST API</li>
+			<li onclick="$('#navTabs').find('> div, li').removeClass('active'); $(this).addClass('active'); $('#tabSand').addClass('active');">Sandbox</li>
+		</ul>
+
+		<div id="tabSetup" data-tab="Setup" class="active">
+			<h4 class="text-primary">Welcome!</h4>
+			<div class="container-fluid text-muted">
+				<ul>
+					<li>Check your setup below to ensure SpRestLib is configured correctly</li>
+					<li>If everything looks okay, then all the functionality in the demo tabs are ready to explore.</li>
+					<li>
+						Please check the <a href="https://github.com/gitbrent/SpRestLib" target="_blank">GitHub Project Site</a> for setup
+						and configuration FAQs and full documentation.
+					</li>
+				</ul>
+			</div>
+
+			<h5 class="text-primary mt-4">JavaScript Library Check</h5>
+			<div class="container-fluid bde-callout-info bg-light p-4">
+				<div class="row mb-4">
+					<div class="col-4">
+						<label class="text-muted">SpRestLib</label>
+						<input id="libChkSprLib" class="form-control w-100" readonly>
+					</div>
+					<div class="col-4">
+						<label class="text-muted">jQuery</label>
+						<input id="libChkJquery" class="form-control w-100" readonly>
+					</div>
+					<div class="col-4">
+						<label class="text-muted">TableSorter</label>
+						<input id="libChkTsorter" class="form-control w-100" readonly>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12">
+						<label class="text-muted">SpRestLib Base URL</label>
+						<input id="spBaseUrl" class="form-control w-100" readonly>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="tabList" data-tab="List Methods">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">List/Library Methods</h4>
+				<ul class="mb-3">
+					<li>
+						See <a href="https://gitbrent.github.io/SpRestLib/docs/api-list.html" target="_blank">API documentation</a>
+						for examples of <code>items()</code>, <code>create()</code>,
+						<code>update()</code>, <code>delete()</code>, and <code>recycle()</code> methods
+					</li>
+					<li>Select one of the Lists/Libraries found on this site to view its properties (only non-hidden Lists/Libraries are shown)</li>
+				</ul>
+				<div class="row">
+					<div id="contFileLibsSelect" class="col-6">
+						<label for="selSiteLists" class="text-muted text-uppercase d-block">Select List/Library</label>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selSiteLists" class="form-control" onchange="handleListChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow active"></div>List Information
+			</h5>
+			<div id="tab1-ListInfo" class="container-fluid">
+				<pre class="my-3"><code class="language-javascript">sprLib.list('listName').info()</code></pre>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>List Columns
+			</h5>
+			<div id="tab1-ListCols" class="container-fluid" style="display:none">
+				<pre class="my-3"><code class="language-javascript">sprLib.list('listName').cols()</code></pre>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>List Permissions
+			</h5>
+			<div id="tab1-ListPerms" class="container-fluid" style="display:none">
+				<pre class="my-3"><code class="language-javascript">sprLib.list('listName').perms()</code></pre>
+				<table id="tabListPerms" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th class="sorter-false showGrpDesc">Permissions</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+
+		<div id="tabFile" data-tab="File Methods">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">File Methods</h4>
+				<p class="mb-3">Select one of the Files found on this site to view File method code/results.</p>
+				<div class="row">
+					<div id="contFileLibsSelect" class="col-6">
+						<label for="selFoldLibs" class="text-muted text-uppercase d-block">Select Library</label>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFileLibs" class="form-control" onchange="handleFileLibChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+					<div id="contFileFileSelect" class="col-6">
+						<label for="selFileFiles" class="text-muted text-uppercase d-block">Select Library File</label>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFileFiles" class="form-control" onchange="handleFileFileChange()" disabled>
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<h4 class="text-dark mt-4">File Info: (Permissions, Properties, Versions)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-3" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>File Properties
+				</h5>
+				<div id="contFileInfo" class="container-fluid" style="display:none">
+					<pre class="my-3"><code class="language-javascript">sprLib.file('fileName').info()</code></pre>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-3" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>File Properties by Version
+				</h5>
+				<div id="contFileVer" class="container-fluid" style="display:none">
+					<pre class="my-3"><code class="language-javascript">sprLib.file('fileName').info({ version:1 })</code></pre>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-3" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>File Permissions
+				</h5>
+				<div id="contFilePerms" class="container-fluid" style="display:none">
+					<pre class="my-3"><code class="language-javascript">sprLib.file('fileName').perms()</code></pre>
+					<table id="tabFilePerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<h4 class="text-dark mt-4">File Manipulation: (Delete/Recycle, Download)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Download File
+				</h5>
+				<div id="contFileGet" class="container-fluid" style="display:none">
+					<div class="container-fluid bde-callout-info bg-light text-muted mb-3">
+						Saving a SharePoint file (text or binary) using client web browser.<br>
+						The `sprLib` Promise returns a blob which can be saved easily - without FileSaver or other libraries.
+					</div>
+
+					<pre class="my-3"><code id="codeGetFile" class="language-javascript">sprLib.file('fileName').get()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="eval($('#codeGetFile').text())">Download Selected File</button>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Delete File (<strong>PERMANENT</strong> - bypasses Recycle Bin)
+				</h5>
+				<div id="contFileDel" class="container-fluid" style="display:none">
+					<pre class="my-3"><code id="codeDelFile" class="language-javascript">sprLib.file('fileName').delete()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFileDelete()">Delete Selected File</button>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Recycle File (sends item to the site Recycle Bin)
+				</h5>
+				<div id="contFileRec" class="container-fluid" style="display:none">
+					<pre class="my-3"><code id="codeRecFile" class="language-javascript">sprLib.file('fileName').recycle()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFileRecycle()">Recycle Selected File</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="tabFold" data-tab="Folder Methods">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">Folder Methods</h4>
+				<p class="mb-3">Select a site library/folder to autopopulate the code samples/results below.</p>
+				<div class="row">
+					<div id="contFoldLibSelect" class="col-6">
+						<label for="selFoldLibs" class="text-muted text-uppercase d-block">Select Library</label>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFoldLibs" class="form-control" onchange="handleFoldLibChange()">
+							<option value="">Select...</option>
+						</select>
+					</div>
+					<div id="contFoldFldSelect" class="col-6">
+						<label for="selFoldFlds" class="text-muted text-uppercase d-block">Select Library Folder</label>
+						<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+						<select id="selFoldFlds" class="form-control" onchange="handleFoldFldChange()" disabled>
+							<option value="">Select...</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<h4 class="text-dark mt-5">Folder Info: (Permissions, Properties)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Properties
+				</h5>
+				<div id="contFoldInfo" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').info()</code></pre>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Permissions
+				</h5>
+				<div id="contFoldPerms" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').perms()</code></pre>
+					<table id="tabFoldPerms" class="tabModern">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th class="sorter-false showGrpDesc">Permissions</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<h4 class="text-dark mt-5">Folder Contents: (Files, Folders)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Contents: Files
+				</h5>
+				<div id="contFoldFiles" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').files()</code></pre>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Folder Contents: Folders
+				</h5>
+				<div id="contFoldFolds" class="container-fluid" style="display:none">
+					<pre><code class="language-javascript">sprLib.folder('folderName').folders()</code></pre>
+				</div>
+			</div>
+
+			<h4 class="text-dark mt-5">Folder Manipulation: (Add, Delete, Recycle)</h4>
+			<hr>
+			<div>
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Add Folder
+				</h5>
+				<div id="contFoldAdd" class="container-fluid" style="display:none">
+					<pre><code id="codeAddFold" class="language-javascript">sprLib.folder('FolderName').add('NewFolder')</code></pre>
+					<div class="row align-items-end bg-light w-50 p-3 ml-1 mt-2">
+						<div class="col-8">
+							<label for="addFolderName" class="text-muted">New Folder Name</label>
+							<input id="addFolderName" type="text" class="form-control w-100">
+							<div class="invalid-feedback">Please enter a new folder name</div>
+						</div>
+						<div class="col-4 text-center">
+							<button type="button" class="btn btn-primary mt-2" onclick="doAddFolder()">Add New Folder</button>
+						</div>
+					</div>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Delete Folder (<strong>PERMANENT</strong> - bypasses Recycle Bin)
+				</h5>
+				<div id="contFoldDel" class="container-fluid" style="display:none">
+					<pre><code id="codeDelFold" class="language-javascript">sprLib.folder('FolderName').delete()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFoldDelete()">Delete Selected Folder</button>
+				</div>
+
+				<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+					<div class="arrow"></div>Recycle Folder (sends item to the site Recycle Bin)
+				</h5>
+				<div id="contFoldRec" class="container-fluid" style="display:none">
+					<pre><code id="codeRecFold" class="language-javascript">sprLib.folder('FolderName').recycle()</code></pre>
+					<button type="button" class="btn btn-primary w-25 mt-2" onclick="doFoldRecycle()">Recycle Selected Folder</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="tabSite" data-tab="Site Methods">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">Local Site Methods</h4>
+				<div class="text-muted">These methods are scoped to the local site and will return results for this particular site (eg: a subsite)</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow active"></div>Site Contents
+			</h5>
+			<div class="container-fluid">
+				<div><pre><code class="language-javascript">sprLib.site().lists()</code></pre></div>
+
+				<table id="tabSiteLists" class="tabModern">
+					<thead>
+						<tr>
+							<th>List Name/Desc</th>
+							<th>Type</th>
+							<th>Items</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Info
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().info()</code></pre></div>
+
+				<table id="tabSiteInfo" class="tabModern">
+					<thead>
+						<tr>
+							<th>Prop Name</th>
+							<th>Prop Value</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Permissions
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().perms()</code></pre></div>
+
+				<table id="tabSitePerms" class="tabModern">
+					<thead>
+						<tr>
+							<th>Member</th>
+							<th class="sorter-false showGrpDesc">Roles/Levels</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Subsites
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().subsites()</code></pre></div>
+
+				<table id="tabSiteSubsites" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Created</th>
+							<th>Modified</th>
+							<th>Relative URL</th>
+							<th>Site Logo URL</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75 mt-5">
+				<h4 class="text-primary">Site Collection Methods</h4>
+				<div class="text-muted">These methods are scoped to the top level site - the Site Collection, not subsites - meaning, you'll get the same results whether you include a subsite</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Permission Groups
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().groups()</code></pre></div>
+
+				<table id="tabSiteGroups" class="tabModern">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Owner</th>
+							<th>Members</th>
+							<th class="sorter-false showGrpDesc">Description</th>
+							<th class="sorter-false showGrpMemb">Member Names</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Permission Roles/Levels
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().roles()</code></pre></div>
+
+				<table id="tabSiteRoles" class="tabModern">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Site Users
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div><pre><code class="language-javascript">sprLib.site().users()</code></pre></div>
+
+				<table id="tabSiteUsers" class="tabModern">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>LoginName</th>
+							<th>Email</th>
+							<th>IsSiteAdmin</th>
+							<th>Groups</th>
+							<th class="sorter-false">Group Details</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+
+		<div id="tabUser" data-tab="Users">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">User Methods</h4>
+				<div class="text-muted">Get User Information (Title, Email, etc.) and User Groups (which SP Groups they belong to)</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>User Information
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div id="user1Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
+				<div id="user1Html" class="mb-2">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Prop Name</th>
+								<th style="width:90%">Prop Value</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>User Groups
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div id="user2Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
+				<div id="user2Html" class="mb-2">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Group ID</th>
+								<th style="width:90%">Group Title</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 mt-5 w-75">
+				<h4 class="text-primary">User Profile Methods</h4>
+				<div class="text-muted">
+					The <code>user().profile()</code> method utliizes the
+					<a class="alert-link" href="https://technet.microsoft.com/en-us/library/ee662538.aspx" target="_blank">UserProfile Service API</a>,
+					which requires either an enterprise license for on-prem installations, or a SharePoint Online subscription.
+				</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>Individual User Profile Properties
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div id="user3Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
+				<div id="user3Html" class="mb-2">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Prop Name</th>
+								<th style="width:90%">Prop Value</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+
+			<h5 class="text-primary bde-arrow-cont mt-4" onclick="$(this).next('div').toggle('slow'); $(this).find('.arrow').toggleClass('active');" title="Click to Show/Hide">
+				<div class="arrow"></div>All User Profile Properties
+			</h5>
+			<div class="container-fluid" style="display:none">
+				<div id="user4Code"><pre class="my-3"><code class="language-javascript"></code></pre></div>
+				<div id="user4Html" style="margin-bottom:20px">
+					<table class="tabModern">
+						<thead>
+							<tr>
+								<th style="width:10%">Prop Name</th>
+								<th style="width:90%">Prop Value</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div id="tabRest" data-tab="REST API">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 w-75">
+				<h4 class="text-primary">REST API</h4>
+				<div class="text-muted">SpRestLib also provides the ability to run an ad-hoc REST query.</div>
+			</div>
+
+			<h5 class="text-primary mt-4">Sample Query</h5>
+			<div id="rest1Code" class="container-fluid mb-4"><pre><code class="language-javascript"></code></pre></div>
+
+			<h5 class="text-primary mt-4">Query Results</h5>
+			<div id="rest1Html" class="container-fluid mb-4 code text-monospace bg-light p-3"></div>
+		</div>
+
+		<div id="tabSand" data-tab="Code Sandbox">
+			<div class="container-fluid bde-callout-info bg-light text-muted mx-0 mb-4 w-75">
+				<h4 class="text-primary">Code Sandbox</h4>
+				<div>
+					The code below is editable - use it try any sprLib features.<br>
+					The sandbox will handle the <code>then()</code> and <code>catch()</code> for you, so just use code as shown see below.<br>
+					Both array results (ex:`<code>list().items()</code>`) and object results (ex:`<code>list().info()</code>`) are supported.
+				</div>
+			</div>
+
+			<pre><code id="sandboxCode" contenteditable="true" class="language-javascript" spellcheck="false"></code></pre>
+			<button type="button" class="btn btn-success mt-2 mb-4 w-25" style="max-width:500px" onclick="execCodeAndShowResults('sandboxCode','sandboxData')">Execute Sandbox Code</button>
+
+			<h5 class="text-primary mt-4">Results</h5>
+			<div id="sandboxData" class="code text-monospace bg-light p-3"></div>
+		</div>
+	</div>
+</body>
+</html>

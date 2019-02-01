@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>SpRestLib Demo :: File Upload</title>
+	<meta charset="utf-8">
+	<meta name="viewport"    content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="author"      content="https://github.com/gitbrent/">
+	<meta name="website"     content="https://github.com/gitbrent/SpRestLib/">
+	<meta name="keywords"    content="SpRestLib, JavaScript, js-sharepoint, SP2013 REST, SharePoint 2013, SharePoint 2016, SharePoint Online">
+	<meta name="description" content="Content Editor Webpart: SpRestLib features and capabilities">
+	<meta name="revised"     content="20181211">
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.1.3/yeti/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-okaidia.min.css">
+
+	<style>
+		/* sharpeoint corev15.css vfixes */
+		#contentRow { padding-top: 0; }
+
+		/* ========== ========== */
+		#tabResults thead th {
+			font-size: 12px;
+		}
+		#tabResults tbody td:last-child {
+			background: white;
+		}
+		.groupItem {
+			display: inline-block;
+			background: #CDE7F1;
+			color: #666;
+			border: 1px #ccc solid;
+			margin: 0 6px 3px 0;
+			padding: 2px 6px;
+			border-radius: 3px;
+		}
+
+		/* ========== ========== */
+		#console {
+			font-face: courier new, monospace;
+			font-size: 12px;
+			padding: 5px;
+			background: #eee;
+			border: 1px #ccc solid;
+		}
+
+		#console span {
+			color: red;
+			background: yellow;
+			font-weight: bold;
+			font-size: large;
+		}
+	</style>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
+	<!--<script src="https://cdn.jsdelivr.net/gh/gitbrent/SpRestLib@1.9.0/dist/sprestlib.bundle.js"></script>-->
+	<script src="../SiteAssets/sprestlib/js/sprestlib.js"></script>
+
+	<script>
+		// APP
+		var APP_BLD = 20181209;
+		// CONST
+		var HTML_SPINNER = '<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>';
+
+		/*
+			REFS:
+			https://blogs.msdn.microsoft.com/uksharepoint/2013/04/20/uploading-files-using-the-rest-api-and-client-side-techniques/
+			https://msdn.microsoft.com/en-us/library/office/dn769086.aspx
+			http://sharepoint.stackexchange.com/questions/74969/properties-when-uploading-files-using-rest-in-sp-2013
+		*/
+
+		// ==================================================================================================================
+
+		function doPopulateApp() {
+			var fileName = "";
+			try { fileName = $('#filePicker')[0].files[0]; } catch(ex){}
+
+			// STEP 1:
+			$('#sprLibCode').text(
+				'// STEP 1: Use FilePicker to read file\n'
+				+'var reader = new FileReader();\n'
+				+'reader.readAsArrayBuffer( $(\'#filePicker\')[0].files[0] );\n'
+				+'reader.onloadend = function(e){\n'
+				+'    var parts = $(\'#filePicker\')[0].value.split("\\\\");\n'
+				+'    var fileName = parts[parts.length - 1];\n'
+				+'    var foldName = $(\'#selDestLib\').val();\n'
+				+'\n'
+				+'    // STEP 2: Upload file to SharePoint\n'
+				+'    sprLib.folder( foldName ).upload({\n'
+				+'        name: fileName,\n'
+				+'        data: e.target.result,\n'
+				+'        overwrite: true\n'
+				+'    });\n'
+				+'});'
+			);
+			Prism.highlightElement( $('#sprLibCode')[0] );
+
+			// STEP 2:
+			sprLib.site().lists()
+			.then(function(arrLists){
+				arrLists.forEach(function(list){
+					if ( list.BaseType == 'Library' && !list.Hidden ) {
+						$('#selDestLib').append('<option value="'+ list.ServerRelativeUrl +'">'+ list.Title +'</option>');
+					}
+				});
+
+				$('#contOptions .sprlib-spinner').hide();
+			})
+			.catch(function(strErr){
+				alert(strErr);
+			});
+		}
+
+		function doUploadFile() {
+			// STEP 1: Form validation
+			{
+				$('select, input').removeClass('is-invalid');
+
+				if ( !$('#selDestLib').val() ) $('#selDestLib').addClass('is-invalid');
+				if ( !$('#filePicker') || !$('#filePicker')[0] || !$('#filePicker')[0].value ) $('#filePicker').addClass('is-invalid');
+
+				if ( $('body .is-invalid').length > 0 ) return;
+			}
+
+			// STEP 2: Status update
+			$('#console').append('<h5 class="text-primary">Starting file upload...</h5>');
+
+			// STEP 3: Get the local file as an array buffer
+			var reader = new FileReader();
+			reader.readAsArrayBuffer( $('#filePicker')[0].files[0] );
+			reader.onloadend = function(e){
+				var parts = $('#filePicker')[0].value.split('\\');
+				var fileName = parts[parts.length - 1];
+				var foldName = $('#selDestLib').val();
+
+				// STEP 4: Pass buffer as `data` to upload file
+				sprLib.folder( foldName ).upload({
+				    name: fileName,
+				    data: e.target.result,
+				    overwrite: true
+				})
+				.then(function(objFile){
+					if ( objFile ) {
+						$('#console').append('<h5 class="text-success">SUCCESS! "'+ objFile.Name +'" uploaded to: '+ objFile.ServerRelativeUrl +'</h5>');
+					}
+					else {
+						$('#console').append('<h5 class="text-danger">File ojbect not returned!</h5>');
+					}
+				})
+				.catch(function(strErr){
+					console.error(strErr);
+				});
+			};
+			reader.onerror = function(e){
+				alert(e.target.error.responseText);
+				console.error(e.target.error);
+			};
+		}
+
+		// ==================================================================================================================
+
+		function appStart() {
+			// STEP 1: Verify FileReader API (HTML5) support
+			if ( !window.FileReader ) {
+				alert('Sorry, but your browser does not support the FileReader API.');
+				return;
+			}
+
+			// STEP 2: Show version
+			$('#console').append('<h5 class="text-primary">FYI: sprLib.version = '+ sprLib.version +'</h5>');
+
+			// STEP 3: Populate
+			doPopulateApp();
+		}
+
+		// ==================================================================================================================
+		window.onload = function(){ appStart(); SetFullScreenMode(true); }
+	</script>
+</head>
+<body>
+	<div class="container mt-0">
+		<h1 class="text-primary mb-4">SpRestLib Demo :: Upload File to SharePoint Library</h1>
+		<div class="row">
+			<div class="col">
+				<div id="appOptions" class="container">
+					<h4 class="text-primary">Upload Demo</h4>
+					<div id="contOptions" class="container bg-light border px-4 py-3 my-3">
+						<div class="row mb-4">
+							<div class="col">
+								<label for="selDestLib" class="text-muted text-uppercase">Target Library</label>
+								<select id="selDestLib" class="form-control bg-white">
+									<option value="">Select...</option>
+								</select>
+								<div class="invalid-feedback">Please select a Library</div>
+								<div class="sprlib-spinner"><div class="sprlib-bounce1"></div><div class="sprlib-bounce2"></div><div class="sprlib-bounce3"></div></div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col">
+								<label for="selDestLib" class="text-muted text-uppercase">Source File</label>
+								<input id="filePicker" type="file" class="form-control">
+								<div class="invalid-feedback">Please select a File</div>
+							</div>
+						</div>
+					</div>
+					<button type="button" class="btn btn-success w-50" onclick="doUploadFile()">Upload File</button>
+				</div>
+			</div>
+			<div class="col">
+				<div id="appCode" class="container">
+					<h4 class="text-primary">Upload Code</h4>
+					<div>
+						<pre class="my-3"><code id="sprLibCode" class="language-javascript"></code></pre>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="appOutput" class="container mt-5">
+		<h4 class="text-primary">Output</h4>
+		<div id="console" class="p-3 my-3"></div>
+	</div>
+</body>
+</html>
